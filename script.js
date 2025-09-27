@@ -35,6 +35,33 @@ document.addEventListener('DOMContentLoaded', function() {
   // Update on resize
   window.addEventListener('resize', handleResponsiveElements);
 
+  // Profile Card Animation Enhancement
+  function initProfileAnimations() {
+    const profileCards = document.querySelectorAll('.profile-card-animated, .profile-img-animated');
+    
+    // Ensure animations trigger properly
+    profileCards.forEach((card, index) => {
+      // Add slight stagger for multiple cards
+      card.style.animationDelay = `${0.3 + (index * 0.2)}s`;
+      
+      // Reset animation on visibility change for better UX
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.style.animationPlayState = 'running';
+            }
+          });
+        }, { threshold: 0.1 });
+        
+        observer.observe(card);
+      }
+    });
+  }
+  
+  // Initialize profile animations
+  initProfileAnimations();
+
   // Education Section Visibility Fix
 // Back to top button functionality
 const backToTopButton = document.getElementById('backToTop');
@@ -134,7 +161,7 @@ const educationSection = document.getElementById('education');
     });
   }
 
-// Skills Carousel Functionality
+// Skills Carousel Functionality - Auto-scroll every 2 seconds
 const skillsCarousel = document.getElementById('skillsCarousel');
 const carouselPrevBtn = document.getElementById('prevBtn');
 const carouselNextBtn = document.getElementById('nextBtn');
@@ -162,7 +189,7 @@ if (skillsCarousel && carouselPrevBtn && carouselNextBtn) {
         currentPosition += itemWidth;
       }
       updateCarouselPosition();
-    }, 3000);
+    }, 2000); // Auto-scroll every 2 seconds
   }
 
   function stopAutoScroll() {
@@ -184,7 +211,7 @@ if (skillsCarousel && carouselPrevBtn && carouselNextBtn) {
       currentPosition -= itemWidth;
       updateCarouselPosition();
     }
-    setTimeout(startAutoScroll, 5000);
+    setTimeout(startAutoScroll, 3000); // 3 seconds pause after manual interaction
   });
 
   carouselNextBtn.addEventListener('click', () => {
@@ -194,7 +221,7 @@ if (skillsCarousel && carouselPrevBtn && carouselNextBtn) {
       currentPosition += itemWidth;
       updateCarouselPosition();
     }
-    setTimeout(startAutoScroll, 5000);
+    setTimeout(startAutoScroll, 3000); // 3 seconds pause after manual interaction
   });
 
   // Initialize carousel
