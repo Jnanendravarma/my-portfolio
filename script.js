@@ -1,5 +1,21 @@
 // Portfolio JavaScript - Dark Theme Only
 document.addEventListener('DOMContentLoaded', function() {
+  
+  // ===== CREATE FLOATING PARTICLES =====
+  const particlesContainer = document.createElement('div');
+  particlesContainer.classList.add('floating-particles');
+  document.body.prepend(particlesContainer);
+  
+  // Create 30 floating particles
+  for (let i = 0; i < 30; i++) {
+    const particle = document.createElement('div');
+    particle.classList.add('particle');
+    particle.style.left = `${Math.random() * 100}%`;
+    particle.style.top = `${Math.random() * 100}%`;
+    particle.style.animationDelay = `${Math.random() * 5}s`;
+    particlesContainer.appendChild(particle);
+  }
+  
   // Initialize AOS (Animate On Scroll) with responsive settings
   if (typeof AOS !== 'undefined') {
     // Adjust animation duration based on screen size
@@ -118,21 +134,21 @@ const educationSection = document.getElementById('education');
 
   // Enhanced Hamburger menu toggle with smooth transitions
   const hamburger = document.getElementById('hamburger-menu');
-  const navbarLinks = document.getElementById('navbar-links');
+  const navCenter = document.querySelector('.nav-center');
   const header = document.querySelector('header');
   
-  if (hamburger && navbarLinks) {
+  if (hamburger && navCenter) {
     // Toggle menu on hamburger click
     hamburger.addEventListener('click', () => {
-      navbarLinks.classList.toggle('active');
+      navCenter.classList.toggle('active');
       hamburger.classList.toggle('active');
       document.body.classList.toggle('menu-open');
     });
     
     // Close menu on link click (better mobile UX)
-    navbarLinks.querySelectorAll('a').forEach(link => {
+    navCenter.querySelectorAll('a').forEach(link => {
       link.addEventListener('click', () => {
-        navbarLinks.classList.remove('active');
+        navCenter.classList.remove('active');
         hamburger.classList.remove('active');
         document.body.classList.remove('menu-open');
       });
@@ -141,11 +157,11 @@ const educationSection = document.getElementById('education');
     // Close menu when clicking outside
     document.addEventListener('click', (e) => {
       if (
-        navbarLinks.classList.contains('active') && 
-        !navbarLinks.contains(e.target) && 
+        navCenter.classList.contains('active') && 
+        !navCenter.contains(e.target) && 
         !hamburger.contains(e.target)
       ) {
-        navbarLinks.classList.remove('active');
+        navCenter.classList.remove('active');
         hamburger.classList.remove('active');
         document.body.classList.remove('menu-open');
       }
@@ -161,81 +177,30 @@ const educationSection = document.getElementById('education');
     });
   }
 
-// Skills Carousel Functionality - Auto-scroll every 2 seconds
-const skillsCarousel = document.getElementById('skillsCarousel');
-const carouselPrevBtn = document.getElementById('prevBtn');
-const carouselNextBtn = document.getElementById('nextBtn');
+// Skills Marquee Scroll Parallax linkage
+const marqueeContents = document.querySelectorAll('.marquee-content');
+let scrollTimeout;
+let lastScrollY = window.scrollY;
 
-if (skillsCarousel && carouselPrevBtn && carouselNextBtn) {
-  let currentPosition = 0;
-  const itemWidth = 200; // 180px + 20px gap
-  let visibleItems = Math.floor(skillsCarousel.parentElement.offsetWidth / itemWidth);
-  const totalItems = skillsCarousel.children.length;
-  
-  function calculateMaxPosition() {
-    visibleItems = Math.floor(skillsCarousel.parentElement.offsetWidth / itemWidth);
-    return Math.max(0, (totalItems - visibleItems) * itemWidth);
-  }
-
-  // Auto-scroll functionality
-  let autoScrollInterval;
-  
-  function startAutoScroll() {
-    autoScrollInterval = setInterval(() => {
-      const maxPosition = calculateMaxPosition();
-      if (currentPosition >= maxPosition) {
-        currentPosition = 0;
-      } else {
-        currentPosition += itemWidth;
-      }
-      updateCarouselPosition();
-    }, 2000); // Auto-scroll every 2 seconds
-  }
-
-  function stopAutoScroll() {
-    clearInterval(autoScrollInterval);
-  }
-
-  function updateCarouselPosition() {
-    const maxPosition = calculateMaxPosition();
-    skillsCarousel.style.transform = `translateX(-${currentPosition}px)`;
+if (marqueeContents.length > 0) {
+  window.addEventListener('scroll', () => {
+    const scrollDiff = Math.abs(window.scrollY - lastScrollY);
+    const acceleration = Math.min(12, scrollDiff * 0.25); // cap speed increase
     
-    // Update button states
-    carouselPrevBtn.disabled = currentPosition === 0;
-    carouselNextBtn.disabled = currentPosition >= maxPosition;
-  }
-
-  carouselPrevBtn.addEventListener('click', () => {
-    stopAutoScroll();
-    if (currentPosition > 0) {
-      currentPosition -= itemWidth;
-      updateCarouselPosition();
-    }
-    setTimeout(startAutoScroll, 3000); // 3 seconds pause after manual interaction
-  });
-
-  carouselNextBtn.addEventListener('click', () => {
-    stopAutoScroll();
-    const maxPosition = calculateMaxPosition();
-    if (currentPosition < maxPosition) {
-      currentPosition += itemWidth;
-      updateCarouselPosition();
-    }
-    setTimeout(startAutoScroll, 3000); // 3 seconds pause after manual interaction
-  });
-
-  // Initialize carousel
-  updateCarouselPosition();
-  startAutoScroll();
-
-  // Pause auto-scroll on hover
-  skillsCarousel.addEventListener('mouseenter', stopAutoScroll);
-  skillsCarousel.addEventListener('mouseleave', startAutoScroll);
-
-  // Handle window resize
-  window.addEventListener('resize', () => {
-    currentPosition = 0;
-    updateCarouselPosition();
+    marqueeContents.forEach(content => {
+      const baseDuration = 25; // seconds
+      const newDuration = Math.max(8, baseDuration - acceleration);
+      content.style.animationDuration = `${newDuration}s`;
+    });
+    
+    lastScrollY = window.scrollY;
+    
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+      marqueeContents.forEach(content => {
+        content.style.animationDuration = '25s';
+      });
+    }, 200);
   });
 }
 
@@ -251,39 +216,39 @@ const projectCards = document.querySelectorAll('.project-card');
 const projects = [
   {
     id: 0,
-    title: "E-Commerce Web Application",
-    description: "A full-stack e-commerce platform built with Node.js, Express.js, and MongoDB. Features include user authentication, product management, shopping cart, and payment integration. The application provides a seamless shopping experience with real-time inventory updates, secure payment processing, and responsive design for all devices.",
-    image: "https://via.placeholder.com/800x500/667eea/ffffff?text=E-Commerce+App",
-    tech: ["Node.js", "Express.js", "MongoDB", "React", "Redux", "Stripe API"],
-    demo: "#",
-    code: "#"
+    title: "EventHub - Event Platform",
+    description: "A comprehensive event hosting and discovery platform designed for campus activities. Users can create events, browse upcoming schedules, register/RSVP, track attendees, and view interactive event venues. Integrated with MongoDB for robust data storage and React for dynamic interface updates.",
+    image: "certificates/projects/eventhub project.png",
+    tech: ["Node.js", "Express.js", "MongoDB", "React", "Tailwind CSS"],
+    demo: "https://event-hub-college.vercel.app",
+    code: "https://github.com/Jnanendravarma/EventHub"
   },
   {
     id: 1,
-    title: "Task Management System",
-    description: "A comprehensive task management application with real-time updates, team collaboration features, and progress tracking. Built with modern web technologies, it includes features like task assignment, deadline management, progress visualization, and team communication tools.",
-    image: "https://via.placeholder.com/800x500/764ba2/ffffff?text=Task+Manager",
-    tech: ["JavaScript", "Python", "SQL", "Bootstrap", "Django", "WebSocket"],
-    demo: "#",
-    code: "#"
+    title: "CampusCare - College Portal",
+    description: "A smart campus administration and student support portal. Streamlines student grievance lodging, hostel administration, administrative approvals, and notifications dispatch. Developed to optimize communication and service workflows across college departments.",
+    image: "certificates/projects/campuscare project.png",
+    tech: ["Java", "Spring Boot", "SQL", "Bootstrap", "Hibernate"],
+    demo: "https://campus-care-smoky.vercel.app",
+    code: "https://github.com/Jnanendravarma/CampusCare"
   },
   {
     id: 2,
-    title: "Weather Forecast App",
-    description: "A responsive weather application that provides real-time weather data, 7-day forecasts, and location-based weather information using external APIs. Features include current weather conditions, hourly forecasts, weather maps, and customizable alerts for severe weather conditions.",
-    image: "https://via.placeholder.com/800x500/667eea/ffffff?text=Weather+App",
-    tech: ["HTML5", "CSS3", "JavaScript", "API", "Chart.js", "Geolocation"],
-    demo: "#",
-    code: "#"
+    title: "WeatherSphere Analytics",
+    description: "A responsive meteorological dashboard delivering live weather forecasts, search histories, climate analytics, and geolocation tracking. Incorporates API integration to stream accurate global weather reports and visually maps regional temperature gradients.",
+    image: "certificates/projects/weathershpere project.png",
+    tech: ["HTML5", "CSS3", "JavaScript", "OpenWeather API", "Chart.js"],
+    demo: "https://weatherapplication-ptpm.vercel.app",
+    code: "https://github.com/Jnanendravarma/weatherapplication"
   },
   {
     id: 3,
-    title: "Personal Portfolio Website",
-    description: "A modern, responsive portfolio website showcasing skills, projects, and professional experience with smooth animations and interactive elements. Features include dynamic content loading, smooth scrolling navigation, contact forms, and social media integration.",
-    image: "https://via.placeholder.com/800x500/764ba2/ffffff?text=Portfolio+Website",
-    tech: ["HTML5", "CSS3", "JavaScript", "Responsive", "GSAP", "Formspree"],
-    demo: "#",
-    code: "#"
+    title: "Interactive Tech Portfolio",
+    description: "A modern developer portfolio designed with an immersive dark cyberpunk theme. Employs hardware-accelerated CSS marquee scroll tracks, dynamic floating background code parallax, smooth custom cursor interactions, and responsive 3D card tilt effects.",
+    image: "certificates/projects/portfolio-mockup.png",
+    tech: ["HTML5", "CSS3", "JavaScript", "GSAP", "AOS"],
+    demo: "https://my-portfolio-xi-eight-51.vercel.app",
+    code: "https://github.com/Jnanendravarma/my-portfolio"
   }
 ];
 
@@ -571,4 +536,204 @@ function showFormMessage(message, type) {
   }
 }
 
+// Certificate Modal Functionality
+const certificateModal = document.getElementById('certificateModal');
+const certificateImage = document.getElementById('certificateImage');
+const certificateCards = document.querySelectorAll('.certification-card');
+const viewCertificateBtns = document.querySelectorAll('.view-certificate-btn');
+
+// Open certificate modal
+viewCertificateBtns.forEach((btn, index) => {
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const card = btn.closest('.certification-card');
+    const certificateSrc = card.getAttribute('data-certificate');
+    
+    if (certificateSrc) {
+      certificateImage.src = certificateSrc;
+      certificateModal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+  });
+});
+
+// Also allow clicking the card itself
+certificateCards.forEach(card => {
+  card.addEventListener('click', (e) => {
+    // Don't open if clicking the button
+    if (e.target.closest('.view-certificate-btn')) return;
+    
+    const certificateSrc = card.getAttribute('data-certificate');
+    if (certificateSrc) {
+      certificateImage.src = certificateSrc;
+      certificateModal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+  });
+});
+
+// Close certificate modal
+if (certificateModal) {
+  const closeBtn = certificateModal.querySelector('.modal-close');
+  const overlay = certificateModal.querySelector('.modal-overlay');
+  
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      certificateModal.style.display = 'none';
+      document.body.style.overflow = '';
+    });
+  }
+  
+  if (overlay) {
+    overlay.addEventListener('click', () => {
+      certificateModal.style.display = 'none';
+      document.body.style.overflow = '';
+    });
+  }
+  
+  // Close on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && certificateModal.style.display === 'flex') {
+      certificateModal.style.display = 'none';
+      document.body.style.overflow = '';
+    }
+  });
+}
+
 }); // Close main DOMContentLoaded function
+
+// ===== CUSTOM CURSOR - STICKY & INTERACTIVE =====
+const cursor = document.createElement('div');
+cursor.classList.add('custom-cursor');
+document.body.appendChild(cursor);
+
+let cursorX = 0;
+let cursorY = 0;
+let currentX = 0;
+let currentY = 0;
+
+document.addEventListener('mousemove', (e) => {
+  cursorX = e.clientX;
+  cursorY = e.clientY;
+});
+
+function animateCursor() {
+  // Smooth easing effect
+  currentX += (cursorX - currentX) * 0.15;
+  currentY += (cursorY - currentY) * 0.15;
+  
+  cursor.style.transform = `translate(${currentX - 10}px, ${currentY - 10}px)`;
+  requestAnimationFrame(animateCursor);
+}
+
+animateCursor();
+
+// Interactive cursor on hover
+const interactiveElements = document.querySelectorAll('a, button, .skill-item, .project-card, .certification-card, .resume-btn, .demo-btn, .view-btn');
+
+interactiveElements.forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cursor.classList.add('hover');
+    
+    // Set cursor text based on element
+    if (el.classList.contains('demo-btn')) {
+      cursor.setAttribute('data-text', 'DEMO');
+    } else if (el.classList.contains('view-btn')) {
+      cursor.setAttribute('data-text', 'VIEW');
+    } else if (el.classList.contains('resume-btn') || el.classList.contains('download-resume-nav')) {
+      cursor.setAttribute('data-text', 'OPEN');
+    } else if (el.classList.contains('project-card')) {
+      cursor.setAttribute('data-text', 'CLICK');
+    } else if (el.classList.contains('certification-card')) {
+      cursor.setAttribute('data-text', 'VIEW');
+    } else {
+      cursor.setAttribute('data-text', 'CLICK');
+    }
+  });
+  
+  el.addEventListener('mouseleave', () => {
+    cursor.classList.remove('hover');
+    cursor.removeAttribute('data-text');
+  });
+});
+
+// ===== 3D TILT EFFECT FOR CARDS =====
+function add3DTilt(selector) {
+  const cards = document.querySelectorAll(selector);
+  
+  cards.forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      
+      const rotateX = ((y - centerY) / centerY) * -10;
+      const rotateY = ((x - centerX) / centerX) * 10;
+      
+      card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-10px) scale(1.02)`;
+    });
+    
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0) scale(1)';
+    });
+  });
+}
+
+// Apply 3D tilt to cards
+add3DTilt('.project-card');
+add3DTilt('.skill-item');
+add3DTilt('.certification-card');
+add3DTilt('.soft-skill-card');
+add3DTilt('.about-content');
+
+// ===== FLOATING ANIMATION FOR NAME =====
+const nameLetters = document.querySelectorAll('.name-letter');
+nameLetters.forEach((letter, index) => {
+  letter.style.display = 'inline-block';
+  letter.style.animation = `float 3s ease-in-out infinite`;
+  letter.style.animationDelay = `${index * 0.1}s`;
+});
+
+// ===== SCROLL REVEAL ANIMATIONS =====
+const observerOptions = {
+  threshold: 0.1,
+  rootMargin: '0px 0px -50px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.opacity = '1';
+      entry.target.style.transform = 'translateY(0)';
+    }
+  });
+}, observerOptions);
+
+// Observe elements for scroll reveal
+const revealElements = document.querySelectorAll('.project-card, .skill-item, .certification-card, .timeline-item, .soft-skill-card');
+revealElements.forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(30px)';
+  el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+  observer.observe(el);
+});
+
+// ===== PARALLAX SCROLL EFFECT =====
+window.addEventListener('scroll', () => {
+  requestAnimationFrame(() => {
+    const scrolled = window.pageYOffset;
+    const parallaxElements = document.querySelectorAll('.parallax-element');
+    
+    parallaxElements.forEach(el => {
+      if (window.innerWidth >= 768) {
+        const speed = parseFloat(el.getAttribute('data-speed')) || 0.05;
+        el.style.transform = `translateY(${scrolled * speed}px)`;
+      } else {
+        el.style.transform = 'none';
+      }
+    });
+  });
+});

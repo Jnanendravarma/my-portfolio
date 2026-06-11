@@ -6,7 +6,7 @@
       "use": "@vercel/static"
     },
     {
-      "src": "style.css",
+      "src": "style-clean.css",
       "use": "@vercel/static"
     },
     {
@@ -19,6 +19,10 @@
     },
     {
       "src": "VARMAB.RESUME.docx",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "certificates/**/*",
       "use": "@vercel/static"
     }
   ],
